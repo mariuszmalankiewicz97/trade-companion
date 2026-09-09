@@ -1,0 +1,54 @@
+import numpy as np
+import pandas as pd
+import pytest
+
+from indicators import calculate_sma
+
+
+def test_calculate_sma_returns_series():
+    test_data = [10, 12, 14, 16, 18, 20]
+    period = 5
+    close = pd.Series(test_data)
+    result = calculate_sma(close, period)
+    assert isinstance(result, pd.Series)
+
+
+def test_calculate_sma_return_correct_period():
+    test_data = [10, 12, 14, 16, 18, 20]
+    period = 5
+    close = pd.Series(test_data)
+    result = calculate_sma(close, period)
+    expected = pd.Series([np.nan, np.nan, np.nan, np.nan, 14.0, 16.0])
+    assert pd.Series.equals(result, expected)
+
+
+def test_calculate_sma_return_incorrect_type_period():
+    with pytest.raises(TypeError):
+        test_data = [10, 12, 14, 16, 18, 20]
+        period = 5.5
+        close = pd.Series(test_data)
+        calculate_sma(close, period)
+
+
+def test_calculate_sma_return_incorrect_period():
+    with pytest.raises(ValueError):
+        test_data = [10, 12, 14, 16, 18, 20]
+        period = -5
+        close = pd.Series(test_data)
+        calculate_sma(close, period)
+
+
+def test_calculate_sma_with_period_longer_than_data():
+    test_data = [10, 12, 14]
+    period = 5
+    close = pd.Series(test_data)
+    result = calculate_sma(close, period)
+    expected = pd.Series([np.nan, np.nan, np.nan])
+    assert pd.Series.equals(result, expected)
+
+
+def test_calculate_sma_with_close_is_not_series():
+    with pytest.raises(TypeError):
+        close = [10, 12, 14, 16, 18, 20]
+        period = 5
+        calculate_sma(close, period)
