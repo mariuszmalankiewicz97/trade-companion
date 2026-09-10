@@ -66,7 +66,7 @@ def test_calculate_ema_returns_correct_values():
     test_data = [10, 12, 14, 16, 18, 20]
     period = 5
     close = pd.Series(test_data)
-    expected = pd.Series([10.00, 11.09, 12.24, 13.45, 14.72, 16.04])
+    expected = pd.Series([10.00, 11.20, 12.53, 13.97, 15.52, 17.15])
     result = calculate_ema(close, period)
     assert pd.Series.equals(round(result, 2), round(expected, 2))
 
