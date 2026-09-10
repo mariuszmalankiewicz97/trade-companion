@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from indicators import calculate_sma
+from indicators import calculate_ema, calculate_sma
 
 
 def test_calculate_sma_returns_series():
@@ -52,3 +52,43 @@ def test_calculate_sma_with_close_is_not_series():
         close = [10, 12, 14, 16, 18, 20]
         period = 5
         calculate_sma(close, period)
+
+
+def test_calculate_ema_returns_series():
+    test_data = [10, 12, 14, 16, 18, 20]
+    period = 5
+    close = pd.Series(test_data)
+    result = calculate_ema(close, period)
+    assert isinstance(result, pd.Series)
+
+
+def test_calculate_ema_returns_correct_values():
+    test_data = [10, 12, 14, 16, 18, 20]
+    period = 5
+    close = pd.Series(test_data)
+    expected = pd.Series([10.00, 11.09, 12.24, 13.45, 14.72, 16.04])
+    result = calculate_ema(close, period)
+    assert pd.Series.equals(round(result, 2), round(expected, 2))
+
+
+def test_calculate_ema_with_close_is_not_series():
+    with pytest.raises(TypeError):
+        close = [10, 12, 14, 16, 18, 20]
+        period = 5
+        calculate_ema(close, period)
+
+
+def test_calculate_ema_incorrect_period():
+    with pytest.raises(ValueError):
+        test_data = [10, 12, 14, 16, 18, 20]
+        period = -5
+        close = pd.Series(test_data)
+        calculate_ema(close, period)
+
+
+def test_calculate_incorrect_type_period():
+    with pytest.raises(TypeError):
+        test_data = [10, 12, 14, 16, 18, 20]
+        period = "5"
+        close = pd.Series(test_data)
+        calculate_ema(close, period)
