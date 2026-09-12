@@ -23,8 +23,6 @@ def calculate_ema(close: pd.Series, period: int) -> pd.Series:
 
 def calculate_rsi(close: pd.Series, period: int) -> pd.Series:
     validate_indicator_inputs(close, period)
-    # if period > len(close):
-    #     return pd.Series([np.nan] * len(close))
     diff = close.diff()
     gain = []
     loss = []
