@@ -72,3 +72,12 @@ def calculate_signal(macd: pd.Series, signal_period: int) -> pd.Series:
         raise ValueError("Signal period can't be less that 1")
     signal: pd.Series = calculate_ema(macd, signal_period)
     return signal
+
+
+def calculate_histogram(macd: pd.Series, signal: pd.Series) -> pd.Series:
+    if not isinstance(macd, pd.Series):
+        raise TypeError("MACD must be a Series")
+    if not isinstance(signal, pd.Series):
+        raise TypeError("Signal must be a Series")
+    histogram: pd.Series = macd - signal
+    return histogram

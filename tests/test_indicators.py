@@ -4,6 +4,7 @@ import pytest
 
 from indicators import (
     calculate_ema,
+    calculate_histogram,
     calculate_macd,
     calculate_rsi,
     calculate_signal,
@@ -248,3 +249,44 @@ def test_calculate_signal_invalid_signal_period_value():
         macd = calculate_macd(close, fast_period, slow_period)
         signal_period = -5
         calculate_signal(macd, signal_period)
+
+
+def test_calculate_histogram_macd_returns_series():
+    close = pd.Series([10, 12, 14, 11, 15])
+    fast_period = 2
+    slow_period = 3
+    macd = calculate_macd(close, fast_period, slow_period)
+    signal_period = 2
+    signal = calculate_signal(macd, signal_period)
+    result = calculate_histogram(macd, signal)
+    assert isinstance(result, pd.Series)
+
+
+def test_calculate_histogram_returns_correct_values():
+    close = pd.Series([10, 12, 14, 11, 15])
+    fast_period = 2
+    slow_period = 3
+    macd = calculate_macd(close, fast_period, slow_period)
+    signal_period = 2
+    signal = calculate_signal(macd, signal_period)
+    result = calculate_histogram(macd, signal)
+    excepted = macd - signal
+    assert pd.Series.equals(result, excepted)
+
+
+def test_calculate_histogram_invalid_macd_type():
+    with pytest.raises(TypeError):
+        macd = 1
+        signal = pd.Series([0.12, 0.3, 0.1])
+        calculate_histogram(macd, signal)
+
+
+def test_calculate_histogram_invalid_signal_type():
+    with pytest.raises(TypeError):
+        close = pd.Series([10, 12, 14, 11, 15])
+        fast_period = 2
+        slow_period = 3
+        macd = calculate_macd(close, fast_period, slow_period)
+        signal_period = 2
+        signal = 1
+        calculate_histogram(macd, signal)
