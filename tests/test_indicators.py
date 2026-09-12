@@ -288,7 +288,6 @@ def test_calculate_histogram_invalid_signal_type():
         fast_period = 2
         slow_period = 3
         macd = calculate_macd(close, fast_period, slow_period)
-        signal_period = 2
         signal = 1
         calculate_histogram(macd, signal)
 
