@@ -81,3 +81,18 @@ def calculate_histogram(macd: pd.Series, signal: pd.Series) -> pd.Series:
         raise TypeError("Signal must be a Series")
     histogram: pd.Series = macd - signal
     return histogram
+
+
+def calculate_bollinger_bands(
+    close: pd.Series, period: int, std_multiplier: float | int
+) -> dict:
+    validate_indicator_inputs(close, period)
+    if not isinstance(std_multiplier, float | int):
+        raise TypeError("Std multiplier must be a float")
+    if std_multiplier <= 0:
+        raise ValueError("Std multiplier must be greater than 0")
+    middle: pd.Series = calculate_sma(close, period)
+    std: pd.Series = close.rolling(period).std()
+    upper: pd.Series = middle + std_multiplier * std
+    lower: pd.Series = middle - std_multiplier * std
+    return {"middle": middle, "upper": upper, "lower": lower}
