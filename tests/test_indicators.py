@@ -6,6 +6,7 @@ from indicators import (
     calculate_ema,
     calculate_macd,
     calculate_rsi,
+    calculate_signal,
     calculate_sma,
 )
 
@@ -200,3 +201,50 @@ def test_calculate_macd_raises_value_error_when_fast_period_is_greater_that_slow
         fast_period = 3
         slow_period = 2
         calculate_macd(close, fast_period, slow_period)
+
+
+def test_calculate_signal_returns_series():
+    close = pd.Series([10, 12, 14, 11, 15])
+    fast_period = 2
+    slow_period = 3
+    macd = calculate_macd(close, fast_period, slow_period)
+    signal_period = 2
+    assert isinstance(calculate_signal(macd, signal_period), pd.Series)
+
+
+def test_calculate_signal_returns_correct_values():
+    close = pd.Series([10, 12, 14, 11, 15])
+    fast_period = 2
+    slow_period = 3
+    macd = calculate_macd(close, fast_period, slow_period)
+    signal_period = 2
+    expected = calculate_ema(macd, signal_period)
+    result = calculate_signal(macd, signal_period)
+    assert pd.Series.equals(result, expected)
+
+
+def test_calculate_signal_invalid_macd_type():
+    with pytest.raises(TypeError):
+        macd = [12, 13, 14, 16]
+        signal_period = 2
+        calculate_signal(macd, signal_period)
+
+
+def test_calculate_signal_invalid_signal_period_type():
+    with pytest.raises(TypeError):
+        close = pd.Series([10, 12, 14, 11, 15])
+        fast_period = 2
+        slow_period = 3
+        macd = calculate_macd(close, fast_period, slow_period)
+        signal_period = 2.5
+        calculate_signal(macd, signal_period)
+
+
+def test_calculate_signal_invalid_signal_period_value():
+    with pytest.raises(ValueError):
+        close = pd.Series([10, 12, 14, 11, 15])
+        fast_period = 2
+        slow_period = 3
+        macd = calculate_macd(close, fast_period, slow_period)
+        signal_period = -5
+        calculate_signal(macd, signal_period)

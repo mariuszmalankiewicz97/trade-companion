@@ -63,3 +63,14 @@ def calculate_macd(close: pd.Series, fast_period: int, slow_period: int) -> pd.S
     ema_slow: pd.Series = calculate_ema(close, slow_period)
     macd: pd.Series = ema_fast - ema_slow
     return macd
+
+
+def calculate_signal(macd: pd.Series, signal_period: int) -> pd.Series:
+    if not isinstance(macd, pd.Series):
+        raise TypeError("MACD must be a Series")
+    if not isinstance(signal_period, int):
+        raise TypeError("Signal period must be an integer")
+    if signal_period < 1:
+        raise ValueError("Signal period can't be less that 1")
+    signal: pd.Series = calculate_ema(macd, signal_period)
+    return signal
