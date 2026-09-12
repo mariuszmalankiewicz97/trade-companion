@@ -46,3 +46,20 @@ def calculate_rsi(close: pd.Series, period: int) -> pd.Series:
     rs = avg_gain / avg_loss
     rsi = 100 - (100 / (1 + rs))
     return rsi
+
+
+def calculate_macd(close: pd.Series, fast_period: int, slow_period: int) -> pd.Series:
+    if not isinstance(fast_period, int):
+        raise TypeError("Fast period must be an integer")
+    if not isinstance(fast_period, int):
+        raise TypeError("Slow period must be an integer")
+    if fast_period < 1:
+        raise ValueError("Fast peroid can't be less than 1")
+    if slow_period < 1:
+        raise ValueError("Slow peroid can't be less than 1")
+    if fast_period > slow_period:
+        raise ValueError("Fast period can't be less that slow period")
+    ema_fast: pd.Series = calculate_ema(close, fast_period)
+    ema_slow: pd.Series = calculate_ema(close, slow_period)
+    macd: pd.Series = ema_fast - ema_slow
+    return macd

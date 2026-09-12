@@ -2,7 +2,12 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from indicators import calculate_ema, calculate_rsi, calculate_sma
+from indicators import (
+    calculate_ema,
+    calculate_macd,
+    calculate_rsi,
+    calculate_sma,
+)
 
 
 def test_calculate_sma_returns_series():
@@ -136,3 +141,62 @@ def test_calculate_rsi_returns_nan_before_enough_data():
     result = calculate_rsi(close, period)
     expected = pd.Series([np.nan, np.nan])
     assert pd.Series.equals(result, expected)
+
+
+def test_calculate_macd_returns_series():
+    close = pd.Series([10, 12, 14, 11, 15])
+    fast_period = 2
+    slow_period = 3
+    result = calculate_macd(close, fast_period, slow_period)
+    assert isinstance(result, pd.Series)
+
+
+def test_calculate_macd_returns_correct_values():
+    close = pd.Series([10, 12, 14, 11, 15])
+    fast_period = 2
+    slow_period = 3
+    ema_fast = calculate_ema(close, fast_period)
+    ema_slow = calculate_ema(close, slow_period)
+    macd = ema_fast - ema_slow
+    result = calculate_macd(close, fast_period, slow_period)
+    assert pd.Series.equals(round(result, 2), round(macd, 2))
+
+
+def test_calculate_macd_raises_type_error_for_invalid_fast_period():
+    with pytest.raises(TypeError):
+        close = pd.Series([10, 12, 14, 11, 15])
+        fast_period = 2.5
+        slow_period = 3
+        calculate_macd(close, fast_period, slow_period)
+
+
+def test_calculate_macd_raises_type_error_for_invalid_slow_period():
+    with pytest.raises(TypeError):
+        close = pd.Series([10, 12, 14, 11, 15])
+        fast_period = 2
+        slow_period = 3.5
+        calculate_macd(close, fast_period, slow_period)
+
+
+def test_calculate_macd_raises_value_error_forinvalid_fast_period():
+    with pytest.raises(ValueError):
+        close = pd.Series([10, 12, 14, 11, 15])
+        fast_period = -1
+        slow_period = 3
+        calculate_macd(close, fast_period, slow_period)
+
+
+def test_calculate_macd_raises_value_error_forinvalid_slow_period():
+    with pytest.raises(ValueError):
+        close = pd.Series([10, 12, 14, 11, 15])
+        fast_period = 2
+        slow_period = -1
+        calculate_macd(close, fast_period, slow_period)
+
+
+def test_calculate_macd_raises_value_error_when_fast_period_is_greater_that_slow_period():
+    with pytest.raises(ValueError):
+        close = pd.Series([10, 12, 14, 11, 15])
+        fast_period = 3
+        slow_period = 2
+        calculate_macd(close, fast_period, slow_period)
