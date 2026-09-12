@@ -23,9 +23,9 @@ def calculate_ema(close: pd.Series, period: int) -> pd.Series:
 
 def calculate_rsi(close: pd.Series, period: int) -> pd.Series:
     validate_indicator_inputs(close, period)
-    diff = close.diff()
-    gain = []
-    loss = []
+    diff: pd.Series = close.diff()
+    gain: list | pd.Series = []
+    loss: list | pd.Series = []
     for ele in diff:
         if pd.isna(ele):
             gain.append(np.nan)
@@ -37,12 +37,12 @@ def calculate_rsi(close: pd.Series, period: int) -> pd.Series:
             ele = ele * -1
             loss.append(ele)
             gain.append(0)
-    gain = pd.Series(gain)
-    loss = pd.Series(loss)
-    avg_gain = gain.rolling(period).mean()
-    avg_loss = loss.rolling(period).mean()
-    rs = avg_gain / avg_loss
-    rsi = 100 - (100 / (1 + rs))
+    gain: list | pd.Series = pd.Series(gain)
+    loss: list | pd.Series = pd.Series(loss)
+    avg_gain: pd.Series = gain.rolling(period).mean()
+    avg_loss: pd.Series = loss.rolling(period).mean()
+    rs: pd.Series = avg_gain / avg_loss
+    rsi: pd.Series = 100 - (100 / (1 + rs))
     return rsi
 
 
