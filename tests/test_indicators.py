@@ -181,7 +181,7 @@ def test_calculate_macd_raises_type_error_for_invalid_slow_period():
         calculate_macd(close, fast_period, slow_period)
 
 
-def test_calculate_macd_raises_value_error_forinvalid_fast_period():
+def test_calculate_macd_raises_value_error_for_invalid_fast_period():
     with pytest.raises(ValueError):
         close = pd.Series([10, 12, 14, 11, 15])
         fast_period = -1
@@ -189,7 +189,7 @@ def test_calculate_macd_raises_value_error_forinvalid_fast_period():
         calculate_macd(close, fast_period, slow_period)
 
 
-def test_calculate_macd_raises_value_error_forinvalid_slow_period():
+def test_calculate_macd_raises_value_error_for_invalid_slow_period():
     with pytest.raises(ValueError):
         close = pd.Series([10, 12, 14, 11, 15])
         fast_period = 2
