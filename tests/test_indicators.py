@@ -3,6 +3,7 @@ import pandas as pd
 import pytest
 
 from indicators import (
+    calculate_average_volume,
     calculate_bollinger_bands,
     calculate_ema,
     calculate_histogram,
@@ -364,3 +365,46 @@ def test_calculate_bollinger_bands_invalid_value_error_std_multiplier():
         period = 3
         std_multiplier = 0
         calculate_bollinger_bands(close, period, std_multiplier)
+
+
+def test_calculate_average_volume_returns_values_float():
+    volume = pd.Series([100, 200, 300])
+    period = 2
+    result = calculate_average_volume(volume, period)
+    assert isinstance(result, float)
+
+
+def test_calculate_average_volume_arg_volume_is_series():
+    with pytest.raises(TypeError):
+        volume = [100, 200, 300]
+        period = 2
+        calculate_average_volume(volume, period)
+
+
+def test_calculate_average_volume_arg_period_is_integer():
+    with pytest.raises(TypeError):
+        volume = pd.Series()
+        period = "2"
+        calculate_average_volume(volume, period)
+
+
+def test_calculate_average_volume_period_cant_be_less_than_one():
+    with pytest.raises(ValueError):
+        volume = pd.Series([100, 200, 300, 400])
+        period = 0
+        calculate_average_volume(volume, period)
+
+
+def test_calculate_average_volume_volume_length_cant_be_less_than_period():
+    with pytest.raises(ValueError):
+        volume = pd.Series([100, 200, 300, 400])
+        period = 20
+        calculate_average_volume(volume, period)
+
+
+def test_calculate_average_volume_excludes_last_day():
+    volume = pd.Series([100, 200, 300, 400, 1000])
+    period = 4
+    result = calculate_average_volume(volume, period)
+    expected = 250.0
+    assert result == expected

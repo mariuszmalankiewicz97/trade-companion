@@ -117,3 +117,17 @@ def calculate_bollinger_bands(
     upper: pd.Series = middle + std_multiplier * std
     lower: pd.Series = middle - std_multiplier * std
     return {"middle": middle, "upper": upper, "lower": lower}
+
+
+def calculate_average_volume(volume: pd.Series, period: int) -> float:
+    if not isinstance(volume, pd.Series):
+        raise TypeError("Volume must be a series")
+    if not isinstance(period, int):
+        raise TypeError("Period must be an integer")
+    if period < 1:
+        raise ValueError("Period can't be less than 1")
+    if period > len(volume):
+        raise ValueError("Volume length can't be less than period")
+    volume_without_last = volume.iloc[:-1]
+    average_volume = sum(volume_without_last.tail(period)) / period
+    return float(average_volume)
