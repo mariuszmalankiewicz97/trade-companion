@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from src.indicators.volume import calculate_average_volume
+from indicators.volume import calculate_average_volume
 
 
 def test_calculate_average_volume_returns_values_float():

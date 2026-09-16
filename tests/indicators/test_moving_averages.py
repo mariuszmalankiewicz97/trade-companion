@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.indicators.moving_averages import calculate_ema, calculate_sma
+from indicators.moving_averages import calculate_ema, calculate_sma
 
 
 def test_calculate_sma_returns_series():

@@ -1,8 +1,8 @@
 import pandas as pd
 import pytest
 
-from src.indicators.macd import calculate_histogram, calculate_macd, calculate_signal
-from src.indicators.moving_averages import calculate_ema
+from indicators.macd import calculate_histogram, calculate_macd, calculate_signal
+from indicators.moving_averages import calculate_ema
 
 
 def test_calculate_macd_returns_series():

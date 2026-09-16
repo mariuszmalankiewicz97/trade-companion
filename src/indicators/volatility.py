@@ -1,6 +1,11 @@
 import pandas as pd
-from moving_averages import calculate_sma
-from validation import validate_is_series, validate_period, validate_std_multiplier
+
+from indicators.moving_averages import calculate_sma
+from indicators.validation import (
+    validate_is_series,
+    validate_period,
+    validate_std_multiplier,
+)
 
 
 def calculate_bollinger_bands(

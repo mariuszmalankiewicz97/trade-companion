@@ -1,6 +1,6 @@
 import pandas as pd
 
-from src.indicators.validation import validate_is_series, validate_period
+from indicators.validation import validate_is_series, validate_period
 
 
 def calculate_average_volume(volume: pd.Series, period: int) -> float:

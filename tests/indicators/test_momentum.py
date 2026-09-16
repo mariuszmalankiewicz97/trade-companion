@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.indicators.momentum import calculate_rsi
+from indicators.momentum import calculate_rsi
 
 
 def test_calculate_rsi_returns_series():
