@@ -1,6 +1,7 @@
 import pandas as pd
-from moving_averages import calculate_ema
-from validation import (
+
+from indicators.moving_averages import calculate_ema
+from indicators.validation import (
     validate_is_series,
     validate_period,
     validate_signal_period,

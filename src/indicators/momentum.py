@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
-from validation import validate_is_series, validate_period
+
+from indicators.validation import validate_is_series, validate_period
 
 
 def calculate_rsi(close: pd.Series, period: int) -> pd.Series:

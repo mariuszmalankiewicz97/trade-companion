@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.indicators.volatility import calculate_bollinger_bands
+from indicators.volatility import calculate_bollinger_bands
 
 
 def test_calculate_bollinger_bands_returns_dict():
