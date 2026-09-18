@@ -22,3 +22,24 @@ def find_pivot_lows(low: pd.Series, period: int) -> pd.Series:
                         pivots.at[index] = value
                         count = 0
     return pivots
+
+
+def find_pivot_highs(high: pd.Series, period: int) -> pd.Series:
+    validate_is_series(high, "High")
+    validate_period(period, "Period")
+    pivots = pd.Series()
+    for index, value in enumerate(high):
+        count = 0
+        if index >= period and index < len(high) - period:
+            for inner_index, inner_value in enumerate(high):
+                if (
+                    index != inner_index
+                    and inner_index >= index - period
+                    and inner_index <= index + period
+                ):
+                    if value > inner_value:
+                        count += 1
+                    if count == period * 2:
+                        pivots.at[index] = value
+                        count = 0
+    return pivots

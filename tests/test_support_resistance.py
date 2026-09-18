@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from support_resistance import find_pivot_lows
+from support_resistance import find_pivot_highs, find_pivot_lows
 
 
 def test_find_pivot_lows_raises_type_error_for_invalid_low():
@@ -37,4 +37,40 @@ def test_find_pivot_lows_returns_correct_values():
     period = 2
     result = find_pivot_lows(low, period)
     expected = pd.Series([4.0, 3.0], index=[2, 5])
+    assert pd.Series.equals(result, expected)
+
+
+def test_find_pivot_highs_raises_type_error_for_invalid_high():
+    with pytest.raises(TypeError):
+        high = []
+        period = 2
+        find_pivot_highs(high, period)
+
+
+def test_find_pivot_highs_raises_type_error_for_invalid_period():
+    with pytest.raises(TypeError):
+        high = pd.Series([100, 102, 103])
+        period = "2"
+        find_pivot_highs(high, period)
+
+
+def test_find_pivot_highs_raises_value_error_for_invalid_period():
+    with pytest.raises(ValueError):
+        high = pd.Series([100, 102, 103])
+        period = 0
+        find_pivot_highs(high, period)
+
+
+def test_find_pivot_highs_returns_correct_structure():
+    high = pd.Series([100, 102, 103])
+    period = 2
+    result = find_pivot_highs(high, period)
+    assert isinstance(result, pd.Series)
+
+
+def test_find_pivot_highs_returns_correct_values():
+    high = pd.Series([40, 30, 50, 30, 40, 100, 30, 40])
+    period = 2
+    result = find_pivot_highs(high, period)
+    expected = pd.Series([50, 100], index=[2, 5])
     assert pd.Series.equals(result, expected)
