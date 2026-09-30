@@ -2,10 +2,12 @@ import pandas as pd
 import pytest
 
 from support_resistance import (
+    concat_low_and_high_price_zones,
     find_pivot_high,
     find_pivot_lows,
     find_the_high_price_zones,
     find_the_low_price_zones,
+    merge_price_zones,
 )
 
 ###
@@ -199,5 +201,89 @@ def test_find_the_high_price_zones_returns_correct_structure():
                 188.8,
             ],
         }
+    )
+    assert pd.DataFrame.equals(result, expected)
+
+
+###
+# CONCAT LOW AND HIGH PRICE ZONES
+###
+
+
+def test_concat_low_and_high_price_zones_type_error_invalid_low_zone():
+    with pytest.raises(TypeError):
+        low_zone = []
+        high_zone = pd.DataFrame()
+        concat_low_and_high_price_zones(low_zone, high_zone)
+
+
+def test_concat_low_and_high_price_zones_type_error_invalid_high_zone():
+    with pytest.raises(TypeError):
+        low_zone = pd.DataFrame()
+        high_zone = []
+        concat_low_and_high_price_zones(low_zone, high_zone)
+
+
+def test_concat_low_and_high_price_zones_returns_correct_structure():
+    low_zone = pd.DataFrame()
+    high_zone = pd.DataFrame()
+    result = concat_low_and_high_price_zones(low_zone, high_zone)
+    assert isinstance(result, pd.DataFrame)
+
+
+###
+# MERGE PRICE ZONES
+###
+
+
+def test_merge_price_zones_type_error_invalid_all_zones():
+    with pytest.raises(TypeError):
+        all_zones = ""
+        last_atr = 2.3
+        merge_price_zones(all_zones, last_atr)
+
+
+def test_merge_price_zones_type_error_invalid_last_atr():
+    with pytest.raises(TypeError):
+        all_zones = pd.DataFrame()
+        last_atr = "30"
+        merge_price_zones(all_zones, last_atr)
+
+
+def test_merge_price_zones_value_error_invalid_last_atr():
+    with pytest.raises(ValueError):
+        all_zones = pd.DataFrame()
+        last_atr = 0.0
+        merge_price_zones(all_zones, last_atr)
+
+
+def test_merge_price_zones_all_zones_is_empty_return_empty_data_frame():
+    all_zones = pd.DataFrame()
+    last_atr = 2.30
+    result = merge_price_zones(all_zones, last_atr)
+    expected = pd.DataFrame()
+    assert pd.DataFrame.equals(result, expected)
+
+
+def test_merge_price_zones_returns_correct_values():
+    all_zones = pd.DataFrame(
+        {
+            "date": ["2025-10-22 00:00:00-04:00", "2025-10-10 00:00:00-04:00"],
+            "type": ["low", "low"],
+            "bottom": [100.00, 103.00],
+            "top": [102.00, 104.00],
+        }
+    )
+    last_atr = 5.00
+    result = merge_price_zones(all_zones, last_atr)
+    expected = pd.DataFrame(
+        {
+            "first_date": "2025-10-10 00:00:00-04:00",
+            "last_date": "2025-10-22 00:00:00-04:00",
+            "bottom": 100.0,
+            "top": 104.0,
+            "touch_count": 2,
+        },
+        index=[0],
     )
     assert pd.DataFrame.equals(result, expected)

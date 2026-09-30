@@ -73,3 +73,72 @@ def find_the_high_price_zones(high_pivots: pd.Series, atr: pd.Series) -> pd.Data
             {"date": date, "type": "high", "top": top_value, "bottom": bottom_value}
         )
     return pd.DataFrame(groups)
+
+
+def concat_low_and_high_price_zones(
+    low_zone: pd.DataFrame, high_zone: pd.DataFrame
+) -> pd.DataFrame:
+    if not isinstance(low_zone, pd.DataFrame):
+        raise TypeError("Low zone name must be a data frame")
+    if not isinstance(high_zone, pd.DataFrame):
+        raise TypeError("High zone name must be a data frame")
+    all_zones = pd.concat([low_zone, high_zone])
+    return all_zones
+
+
+def merge_price_zones(all_zones: pd.DataFrame, last_atr: float) -> pd.DataFrame:
+    if not isinstance(all_zones, pd.DataFrame):
+        raise TypeError("Zones name must be a data frame")
+    if not isinstance(last_atr, float):
+        raise TypeError("Last ATR name must be a float")
+    if last_atr <= 0:
+        raise ValueError("Last ATR can't be less or equal 0")
+    if all_zones.empty:
+        return pd.DataFrame([])
+    length = len(all_zones)
+    start = 0
+    stop = length
+    sorted_by_bottom = all_zones.sort_values(by="top").reset_index(drop=True)
+    merged_zones = []
+    touch_count = 1
+    tolerance = 0.3 * last_atr
+    max_width = 1.5 * last_atr
+    for index in range(start, stop):
+        current_date = sorted_by_bottom.iloc[index]["date"]
+        current_bottom = sorted_by_bottom.iloc[index]["bottom"]
+        current_top = sorted_by_bottom.iloc[index]["top"]
+        if not merged_zones:
+            merged_zones.append(
+                {
+                    "first_date": current_date,
+                    "last_date": current_date,
+                    "bottom": current_bottom,
+                    "top": current_top,
+                    "touch_count": touch_count,
+                }
+            )
+        else:
+            last_zone = merged_zones[-1]
+            if (
+                last_zone["bottom"] <= current_top
+                and last_zone["top"] + tolerance >= current_bottom
+                and max_width
+                >= max(last_zone["top"], current_top) - last_zone["bottom"]
+            ):
+                last_zone["last_date"] = max(last_zone["last_date"], current_date)
+                last_zone["first_date"] = min(last_zone["first_date"], current_date)
+                last_zone["top"] = max(current_top, last_zone["top"])
+                last_zone["bottom"] = min(current_bottom, last_zone["bottom"])
+                last_zone["touch_count"] = last_zone["touch_count"] + 1
+            else:
+                merged_zones.append(
+                    {
+                        "first_date": current_date,
+                        "last_date": current_date,
+                        "bottom": current_bottom,
+                        "top": current_top,
+                        "touch_count": touch_count,
+                    }
+                )
+
+    return pd.DataFrame(merged_zones)
