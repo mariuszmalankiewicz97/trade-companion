@@ -1,0 +1,17 @@
+[project]
+name = "trade-companion"
+version = "0.1.0"
+description = "Stock scanner for swing trading"
+requires-python = ">=3.14"
+
+dependencies = [
+    "numpy",
+    "pandas",
+    "yfinance",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "ruff",
+]
