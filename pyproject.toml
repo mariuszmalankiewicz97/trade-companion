@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "trade-companion"
-version = "0.1.1"
+version = "0.2.1"
 description = "Stock scanner for swing trading"
 requires-python = ">=3.14"
 
