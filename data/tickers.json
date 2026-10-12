@@ -1,0 +1,6 @@
+{
+    "wig20": ["PKO.WA", "PZU.WA","KGH.WA"],
+    "wig40": ["XTB.WA", "OPL.WA","ACP.WA"],
+    "nasdaq100": ["AAPL", "NVDA", "MSFT"],
+    "sp500": ["MU", "AMZN", "INTC"]
+}
