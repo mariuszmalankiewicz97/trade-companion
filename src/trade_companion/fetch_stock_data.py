@@ -13,7 +13,7 @@ def fetch_stock_data(tickers: list, period: str, interval: str) -> pd.DataFrame:
         tickers,
         period=period,
         interval=interval,
-        group_by="ticker",
+        group_by="column",
         threads=True,
         auto_adjust=True,
         actions=False,
