@@ -1,6 +1,24 @@
 {
-    "wig20": ["PKO.WA", "PZU.WA","KGH.WA"],
-    "wig40": ["XTB.WA", "OPL.WA","ACP.WA"],
-    "nasdaq100": ["AAPL", "NVDA", "MSFT"],
-    "sp500": ["MU", "AMZN", "INTC"]
-}
+   "wig20": [
+     "ALE.WA",
+     "ALR.WA",
+     "BDX.WA",
+     "CCC.WA",
+     "CDR.WA",
+     "CPS.WA",
+     "DNP.WA",
+     "JSW.WA",
+     "KGH.WA",
+     "KRU.WA",
+     "KTY.WA",
+     "LPP.WA",
+     "MBK.WA",
+     "OPL.WA",
+     "PEO.WA",
+     "PCO.WA",
+     "PGE.WA",
+     "PKN.WA",
+     "PKO.WA",
+     "PZU.WA"
+   ]
+  }
