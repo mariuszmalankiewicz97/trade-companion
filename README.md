@@ -1,83 +1,128 @@
 # Trade Companion
 
-A Python application for scanning and analyzing stocks for swing trading opportunities.
+A modular Python application for scanning and analyzing stock market data for swing trading opportunities.
 
 ## Project Goal
 
-The goal of this project is to build a stock scanner that analyzes market data and identifies potential long trading setups.
+The goal of this project is to build an automated, reliable stock scanner that analyzes market data and identifies potential long setups based on technical indicators and market structure.
 
-The project is being developed using a test-driven development (TDD) approach.
+The project follows clean architecture principles and is developed using Test-Driven Development (TDD).
+
+## Architecture & Design
+
+The application follows a **4-tier layered architecture** ensuring separation of concerns:
+
+1. **Indicators (`indicators.py`):** Pure numerical calculations (e.g., SMA, EMA). Returns series of data without business decision logic.
+2. **Signals (`signals.py`):** Atomic market criteria evaluation returning boolean values (`is_price_over_sma`, `is_fast_over_slow_sma`).
+3. **Strategies (`daily_trend.py`):** Composition of multiple signals into complete trading rules for specific timeframes.
+4. **Scanner / Orchestration (`daily_scanner.py`):** End-to-end workflow handling ticker ingestion, external data fetching via API, error handling, and terminal reporting.
 
 ## Technologies
 
-* Python 3.14+
-* pandas
-* NumPy
-* yfinance
-* pytest
-* Ruff
-* Visual Studio Code
+- Python 3.14+
+- pandas
+- NumPy
+- yfinance
+- pytest
+- Ruff
+- Visual Studio Code
+
+## Project Structure
+
+```text
+trade-companion/
+├── data/
+│   └── tickers.json              # Watchlist configuration
+├── src/
+│   └── trade_companion/
+│       ├── __init__.py
+│       ├── daily_scanner.py      # Entry point / Orchestration
+│       ├── daily_trend.py        # Strategy definition
+│       ├── fetch_stock_data.py   # Market data fetching (yfinance adapter)
+│       ├── indicators.py         # Pure math indicators (SMA, etc.)
+│       ├── signals.py            # Boolean market signals
+│       └── tickers.py            # Watchlist loader, parser & deduplicator
+├── tests/
+│   ├── integration/
+│   │   └── test_daily_scanner.py # Workflow integration tests
+│   └── unit/
+│       ├── test_daily_scanner.py
+│       ├── test_fetch_stock_data.py
+│       ├── test_indicators.py
+│       ├── test_signals.py
+│       └── test_tickers.py
+├── .gitignore
+├── pyproject.toml
+└── README.md
+```
 
 ## Installation
-
 Clone the repository and navigate to the project directory:
-
 ```bash
 git clone https://github.com/mariuszmalankiewicz97/trade-companion.git
 cd trade-companion
 ```
 
-Create a virtual environment:
+### Create and activate a virtual environment:
 
+#### Windows
 ```bash
 python -m venv .venv
-```
-
-Activate the virtual environment.
-
-### Windows
-
-```bash
 .venv\Scripts\activate
 ```
-
-Install the project dependencies:
-
+#### macOS / Linux
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+#### Install the project in editable mode with development dependencies:
 ```bash
 pip install -e .
 ```
-
-## VS Code Setup
-
-Install the **Ruff** extension in Visual Studio Code.
-
-Open the Extensions panel:
-
-```text
-Ctrl + Shift + X
+## Running the Scanner
+Configure your ticker list in data/tickers.json:
+```json
+{
+   "wig20": [
+     "ALE.WA",
+     "ALR.WA",
+     "BDX.WA"
+   ]
+}
 ```
-
-Search for:
-
-```text
-Ruff
+Run the daily trend scanner:
+```bash
+python -m trade_companion.daily_scanner
 ```
-
-Install the **Ruff** extension by Astral Software.
-
-To enable automatic formatting and fixes on save, open the VS Code `settings.json`:
-
-```text
-Ctrl + Shift + P
-→ Preferences: Open User Settings (JSON)
+## Running Tests
+Run all unit and integration tests:
+```bash
+pytest
 ```
+Run tests with verbose output:
+```bash
+pytest -v
+```
+## Code Quality & Formatting
+Ruff is used for linting and code formatting.
 
-Add:
-
+Check the project for issues:
+```bash
+ruff check .
+```
+Automatically fix issues:
+```bash
+ruff check . --fix
+```
+Format code:
+```bash
+ruff format .
+```
+### VS Code Integration
+To format and lint automatically on save, add the following to .vscode/settings.json:
 ```json
 {
     "editor.formatOnSave": true,
-
     "[python]": {
         "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.codeActionsOnSave": {
@@ -86,67 +131,33 @@ Add:
     }
 }
 ```
-
-## Running Tests
-
-Run all tests with:
-
-```bash
-pytest
-```
-
-## Ruff
-
-Ruff is used for code linting and formatting.
-
-Check the project for code issues:
-
-```bash
-ruff check .
-```
-
-Automatically fix issues that Ruff can fix:
-
-```bash
-ruff check . --fix
-```
-
-Format the code:
-
-```bash
-ruff format .
-```
-
 ## Features
+### Completed
+- [x] 4-layer modular architecture (Indicators -> Signals -> Strategy -> Scanner).
 
-The project is currently under development.
+- [x] Ticker loader with deduplication and order preservation (tickers.py).
 
-Planned features:
+- [x] Batch data downloading with MultiIndex mapping to individual stock DataFrames (fetch_stock_data.py).
 
-* fetching stock market data,
-* ticker validation,
-* technical indicator analysis,
-* High/Low pivot detection,
-* support and resistance zone detection,
-* volume analysis,
-* Risk/Reward analysis,
-* filtering potential long setups.
+- [x] Robust SMA computation with parameter and type validation (indicators.py).
 
-## Project Structure
+- [x] Trend signals evaluation with NaN and data insufficiency protection (signals.py).
 
-```text
-trade-companion/
-├── src/
-├── tests/
-├── .gitignore
-├── pyproject.toml
-└── README.md
-```
+- [x] Comprehensive unit and integration test suite with high coverage using pytest.
+
+### In Progress / Planned
+- [ ] High/Low pivot and trend structure detection (HH / HL).
+
+- [ ] Volume confirmation filters.
+
+- [ ] Support and resistance zone detection.
+
+- [ ] Risk/Reward ratio calculation and stop-loss placement.
+
+- [ ] Exporting scan results to CSV / Telegram / Discord alerts.
 
 ## Status
-
 🚧 Work in progress.
 
 ## Author
-
 Mariusz Malankiewicz
