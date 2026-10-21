@@ -37,9 +37,9 @@ trade-companion/
 │   └── trade_companion/
 │       ├── __init__.py
 │       ├── daily_scanner.py      # Entry point / Orchestration
-│       ├── daily_trend.py        # Strategy definition
+│       ├── daily_trend.py        # Strategy definition (SMA + HH/HL)
 │       ├── fetch_stock_data.py   # Market data fetching (yfinance adapter)
-│       ├── indicators.py         # Pure math indicators (SMA, etc.)
+│       ├── indicators.py         # Pure math indicators & swing point detection
 │       ├── signals.py            # Boolean market signals
 │       └── tickers.py            # Watchlist loader, parser & deduplicator
 ├── tests/
@@ -47,6 +47,7 @@ trade-companion/
 │   │   └── test_daily_scanner.py # Workflow integration tests
 │   └── unit/
 │       ├── test_daily_scanner.py
+│       ├── test_daily_trend.py
 │       ├── test_fetch_stock_data.py
 │       ├── test_indicators.py
 │       ├── test_signals.py
@@ -133,6 +134,7 @@ To format and lint automatically on save, add the following to .vscode/settings.
 ```
 ## Features
 ### Completed
+Completed
 - [x] 4-layer modular architecture (Indicators -> Signals -> Strategy -> Scanner).
 
 - [x] Ticker loader with deduplication and order preservation (tickers.py).
@@ -141,20 +143,22 @@ To format and lint automatically on save, add the following to .vscode/settings.
 
 - [x] Robust SMA computation with parameter and type validation (indicators.py).
 
+- [x] Pivot detection and swing point normalization (find_raw_swings, clean_swings).
+
+- [x] Market structure trend evaluation (is_hh_hl_trend).
+
 - [x] Trend signals evaluation with NaN and data insufficiency protection (signals.py).
 
 - [x] Comprehensive unit and integration test suite with high coverage using pytest.
 
 ### In Progress / Planned
-- [ ] High/Low pivot and trend structure detection (HH / HL).
-
-- [ ] Volume confirmation filters.
+- [ ] Volume confirmation filters (e.g., volume spike, volume > SMA 20).
 
 - [ ] Support and resistance zone detection.
 
 - [ ] Risk/Reward ratio calculation and stop-loss placement.
 
-- [ ] Exporting scan results to CSV / Telegram / Discord alerts.
+- [ ] Exporting scan results to CSV or JSON / Telegram alerts.
 
 ## Status
 🚧 Work in progress.
