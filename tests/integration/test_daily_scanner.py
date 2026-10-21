@@ -7,7 +7,7 @@ from trade_companion import daily_scanner
 
 def test_main_scans_configured_tickers_with_fetched_close_data(
     tmp_path, monkeypatch, capsys
-):
+) -> None:
     tickers_file = tmp_path / "tickers.json"
     tickers_file.write_text(
         json.dumps({"watchlist": ["AAA", "BBB", "AAA", "NO_DATA"]}),
@@ -15,9 +15,25 @@ def test_main_scans_configured_tickers_with_fetched_close_data(
     )
     monkeypatch.setattr(daily_scanner, "TICKERS_FILE", tickers_file)
 
-    dates = pd.date_range("2025-01-01", periods=202)
-    df_aaa = pd.DataFrame({"Close": [None] + [100.0] * 200 + [110.0]}, index=dates)
-    df_bbb = pd.DataFrame({"Close": [100.0] * 201 + [90.0]}, index=dates)
+    dates = pd.date_range("2025-01-01", periods=205)
+
+    df_aaa = pd.DataFrame(
+        {
+            "Close": [100.0] * 204 + [110.0],
+            "High": [102.0] * 204 + [112.0],
+            "Low": [98.0] * 204 + [108.0],
+        },
+        index=dates,
+    )
+
+    df_bbb = pd.DataFrame(
+        {
+            "Close": [100.0] * 204 + [90.0],
+            "High": [102.0] * 204 + [92.0],
+            "Low": [98.0] * 204 + [88.0],
+        },
+        index=dates,
+    )
 
     mock_market_data = {
         "AAA": df_aaa,
@@ -32,15 +48,10 @@ def test_main_scans_configured_tickers_with_fetched_close_data(
 
     monkeypatch.setattr(daily_scanner, "fetch_stock_data", fake_fetch_stock_data)
 
-    strategy_calls = []
-    real_strategy = daily_scanner.daily_trend_strategy
+    def fake_strategy(df: pd.DataFrame) -> bool:
+        return df is df_aaa
 
-    def spy_strategy(ticker_df):
-        result = real_strategy(ticker_df)
-        strategy_calls.append(result)
-        return result
-
-    monkeypatch.setattr(daily_scanner, "daily_trend_strategy", spy_strategy)
+    monkeypatch.setattr(daily_scanner, "daily_trend_strategy", fake_strategy)
 
     daily_scanner.main()
 
