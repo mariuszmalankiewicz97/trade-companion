@@ -6,7 +6,6 @@ from trade_companion.fetch_stock_data import fetch_stock_data
 
 
 def _create_sample_df() -> pd.DataFrame:
-    """Tworzy standardowy DataFrame dla pojedynczego tickera."""
     return pd.DataFrame(
         {
             "Open": [150.0, 152.0],
