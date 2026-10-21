@@ -1,9 +1,10 @@
 import pytest
 
-from trade_companion.indicators import SwingPoint
+from trade_companion.indicators import FibZone, SwingPoint
 from trade_companion.signals import (
     is_fast_over_slow_sma,
     is_hh_hl_trend,
+    is_price_in_fib_zone,
     is_price_over_sma,
 )
 
@@ -188,3 +189,49 @@ def test_is_hh_hl_trend_returns_false_for_insufficient_swings(
     insufficient_swings: list[SwingPoint],
 ) -> None:
     assert is_hh_hl_trend(insufficient_swings) is False
+
+
+@pytest.fixture
+def sample_fib_zone() -> FibZone:
+    return FibZone(
+        base_low=100.0,
+        peak_high=150.0,
+        fib_50=125.0,
+        fib_618=119.1,
+    )
+
+
+@pytest.mark.parametrize(
+    "current_low, current_close, expected, description",
+    [
+        (122.0, 124.0, True, "Cena wewnątrz strefy"),
+        (118.0, 121.0, True, "Knot przebił 0.618, ale korpus zamknął się powyżej"),
+        (126.0, 130.0, False, "Low powyżej poziomu 0.50 - brak wejścia w strefę"),
+        (115.0, 118.0, False, "Zamknięcie poniżej 0.618 - setup unieważniony"),
+        (110.0, 112.0, False, "Cała świeca poniżej poziomu 0.618"),
+    ],
+)
+def test_is_price_in_fib_zone_scenarios(
+    current_low: float,
+    current_close: float,
+    expected: bool,
+    description: str,
+    sample_fib_zone: FibZone,
+) -> None:
+    result = is_price_in_fib_zone(current_low, current_close, sample_fib_zone)
+    assert result is expected, f"Błąd w scenariuszu: {description}"
+
+
+def test_is_price_in_fib_zone_exact_boundary_hits(
+    sample_fib_zone: FibZone,
+) -> None:
+    assert is_price_in_fib_zone(125.0, 125.0, sample_fib_zone) is True
+    assert is_price_in_fib_zone(122.0, 119.1, sample_fib_zone) is True
+    assert is_price_in_fib_zone(119.1, 125.0, sample_fib_zone) is True
+
+
+def test_is_price_in_fib_zone_fails_just_outside_boundaries(
+    sample_fib_zone: FibZone,
+) -> None:
+    assert is_price_in_fib_zone(125.0001, 126.0, sample_fib_zone) is False
+    assert is_price_in_fib_zone(122.0, 119.0999, sample_fib_zone) is False

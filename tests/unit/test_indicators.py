@@ -4,10 +4,13 @@ import pandas as pd
 import pytest
 
 from trade_companion.indicators import (
+    FibZone,
     SwingPoint,
+    calculate_fib_zone,
     calculate_sma,
     clean_swings,
     find_raw_swings,
+    get_active_trading_range,
 )
 
 
@@ -51,7 +54,7 @@ def test_calculate_sma_raises_value_error_when_period_exceeds_length() -> None:
 def test_swing_point_immutability() -> None:
     point = SwingPoint(index=5, price=100.0, type="HIGH")
     with pytest.raises(FrozenInstanceError):
-        point.price = 105.0  # type: ignore[misc]
+        point.price = 105.0
 
 
 def test_swing_point_equality() -> None:
@@ -168,7 +171,6 @@ def test_clean_swings_replaces_consecutive_lows_with_lowest() -> None:
 
 
 def test_clean_swings_multiple_consecutive_same_type() -> None:
-
     swings = [
         SwingPoint(index=1, price=100.0, type="HIGH"),
         SwingPoint(index=3, price=90.0, type="LOW"),
@@ -184,3 +186,92 @@ def test_clean_swings_multiple_consecutive_same_type() -> None:
         SwingPoint(index=5, price=80.0, type="LOW"),
         SwingPoint(index=9, price=115.0, type="HIGH"),
     ]
+
+
+def test_fib_zone_immutability() -> None:
+    zone = FibZone(base_low=100.0, peak_high=150.0, fib_50=125.0, fib_618=119.1)
+    with pytest.raises(FrozenInstanceError):
+        zone.fib_50 = 130.0
+
+
+def test_fib_zone_equality() -> None:
+    z1 = FibZone(base_low=100.0, peak_high=150.0, fib_50=125.0, fib_618=119.1)
+    z2 = FibZone(base_low=100.0, peak_high=150.0, fib_50=125.0, fib_618=119.1)
+    assert z1 == z2
+
+
+def test_calculate_fib_zone_standard_values() -> None:
+    zone = calculate_fib_zone(base_low=100.0, peak_high=150.0)
+
+    assert zone.base_low == 100.0
+    assert zone.peak_high == 150.0
+    assert zone.fib_50 == 125.0
+    assert zone.fib_618 == 119.1
+
+
+def test_calculate_fib_zone_precision_rounding() -> None:
+    zone = calculate_fib_zone(base_low=10.1111, peak_high=33.3333)
+
+    assert zone.fib_50 == 21.7222
+    assert zone.fib_618 == 18.982
+
+
+def test_calculate_fib_zone_small_impulse() -> None:
+    zone = calculate_fib_zone(base_low=1.0, peak_high=2.0)
+    assert zone.fib_50 == 1.5
+    assert zone.fib_618 == 1.382
+
+
+def test_get_active_trading_range_standard_uptrend() -> None:
+    swings = [
+        SwingPoint(index=10, price=80.0, type="LOW"),
+        SwingPoint(index=20, price=120.0, type="HIGH"),
+        SwingPoint(index=30, price=100.0, type="LOW"),
+        SwingPoint(index=40, price=150.0, type="HIGH"),
+    ]
+
+    zone = get_active_trading_range(swings)
+
+    assert zone is not None
+    assert zone.base_low == 100.0
+    assert zone.peak_high == 150.0
+    assert zone.fib_50 == 125.0
+    assert zone.fib_618 == 119.1
+
+
+def test_get_active_trading_range_ignores_new_low_formed_after_peak() -> None:
+    swings = [
+        SwingPoint(index=10, price=80.0, type="LOW"),
+        SwingPoint(index=20, price=120.0, type="HIGH"),
+        SwingPoint(index=30, price=100.0, type="LOW"),
+        SwingPoint(index=40, price=150.0, type="HIGH"),
+        SwingPoint(index=55, price=122.0, type="LOW"),
+    ]
+
+    zone = get_active_trading_range(swings)
+
+    assert zone is not None
+    assert zone.base_low == 100.0
+    assert zone.peak_high == 150.0
+    assert zone.fib_50 == 125.0
+    assert zone.fib_618 == 119.1
+
+
+def test_get_active_trading_range_returns_none_when_insufficient_points() -> None:
+    too_few_swings = [
+        SwingPoint(index=10, price=100.0, type="LOW"),
+        SwingPoint(index=20, price=150.0, type="HIGH"),
+        SwingPoint(index=30, price=120.0, type="LOW"),
+    ]
+    assert get_active_trading_range(too_few_swings) is None
+    assert get_active_trading_range([]) is None
+
+
+def test_get_active_trading_range_returns_none_when_no_low_before_latest_high() -> None:
+    corrupted_sequence = [
+        SwingPoint(index=5, price=150.0, type="HIGH"),
+        SwingPoint(index=10, price=160.0, type="HIGH"),
+        SwingPoint(index=20, price=100.0, type="LOW"),
+        SwingPoint(index=30, price=110.0, type="LOW"),
+    ]
+    assert get_active_trading_range(corrupted_sequence) is None

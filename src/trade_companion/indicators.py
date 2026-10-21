@@ -4,6 +4,21 @@ from typing import Literal
 import pandas as pd
 
 
+@dataclass(frozen=True)
+class SwingPoint:
+    index: int
+    price: float
+    type: Literal["HIGH", "LOW"]
+
+
+@dataclass(frozen=True)
+class FibZone:
+    base_low: float
+    peak_high: float
+    fib_50: float
+    fib_618: float
+
+
 def calculate_sma(close: pd.Series, period: int) -> pd.Series:
     if not isinstance(close, pd.Series):
         raise TypeError("Close must be a pandas series")
@@ -21,13 +36,6 @@ def calculate_sma(close: pd.Series, period: int) -> pd.Series:
         raise ValueError("Period can't be greater than length of close")
 
     return close.rolling(window=period).mean()
-
-
-@dataclass(frozen=True)
-class SwingPoint:
-    index: int
-    price: float
-    type: Literal["HIGH", "LOW"]
 
 
 def find_raw_swings(
@@ -81,3 +89,31 @@ def clean_swings(raw_swings: list[SwingPoint]) -> list[SwingPoint]:
             cleaned.append(current)
 
     return cleaned
+
+
+def calculate_fib_zone(base_low: float, peak_high: float) -> FibZone:
+    impulse = peak_high - base_low
+    return FibZone(
+        base_low=base_low,
+        peak_high=peak_high,
+        fib_50=round(peak_high - 0.50 * impulse, 4),
+        fib_618=round(peak_high - 0.618 * impulse, 4),
+    )
+
+
+def get_active_trading_range(
+    cleaned_swings: list[SwingPoint],
+) -> FibZone | None:
+    highs = [s for s in cleaned_swings if s.type == "HIGH"]
+    lows = [s for s in cleaned_swings if s.type == "LOW"]
+
+    if len(highs) < 2 or len(lows) < 2:
+        return None
+
+    latest_high = highs[-1]
+    prior_lows = [l for l in lows if l.index < latest_high.index]
+    if not prior_lows:
+        return None
+
+    base_low = prior_lows[-1]
+    return calculate_fib_zone(base_low=base_low.price, peak_high=latest_high.price)

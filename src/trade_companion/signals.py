@@ -1,4 +1,4 @@
-from trade_companion.indicators import SwingPoint
+from trade_companion.indicators import FibZone, SwingPoint
 
 
 def is_price_over_sma(current_close: float, current_sma: float) -> bool:
@@ -23,3 +23,11 @@ def is_hh_hl_trend(cleaned_swings: list[SwingPoint]) -> bool:
     has_higher_low = latest_low > previous_low
 
     return has_higher_high and has_higher_low
+
+
+def is_price_in_fib_zone(
+    current_low: float, current_close: float, fib: FibZone
+) -> bool:
+    tested_zone = current_low <= fib.fib_50
+    held_above_invalidation = current_close >= fib.fib_618
+    return tested_zone and held_above_invalidation
