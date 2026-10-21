@@ -4,7 +4,7 @@ A modular Python application for scanning and analyzing stock market data for sw
 
 ## Project Goal
 
-The goal of this project is to build an automated, reliable stock scanner that analyzes market data and identifies potential long setups based on technical indicators and market structure.
+The goal of this project is to build an automated, reliable stock scanner that analyzes market data and identifies potential long setups based on technical indicators, market structure, and Fibonacci retracement zones.
 
 The project follows clean architecture principles and is developed using Test-Driven Development (TDD).
 
@@ -12,10 +12,10 @@ The project follows clean architecture principles and is developed using Test-Dr
 
 The application follows a **4-tier layered architecture** ensuring separation of concerns:
 
-1. **Indicators (`indicators.py`):** Pure numerical calculations (e.g., SMA, EMA). Returns series of data without business decision logic.
-2. **Signals (`signals.py`):** Atomic market criteria evaluation returning boolean values (`is_price_over_sma`, `is_fast_over_slow_sma`).
-3. **Strategies (`daily_trend.py`):** Composition of multiple signals into complete trading rules for specific timeframes.
-4. **Scanner / Orchestration (`daily_scanner.py`):** End-to-end workflow handling ticker ingestion, external data fetching via API, error handling, and terminal reporting.
+1. **Indicators (`indicators.py`):** Pure numerical calculations (e.g., SMA, EMA), structural swing point detection (`find_raw_swings`, `clean_swings`), and Fibonacci retracement zone calculation (`calculate_fib_zone`, `get_active_trading_range`).
+2. **Signals (`signals.py`):** Atomic market criteria evaluation returning boolean values (`is_price_over_sma`, `is_fast_over_slow_sma`, `is_hh_hl_trend`, `is_price_in_fib_zone`).
+3. **Strategies (`daily_trend.py`):** Composition of multiple signals into complete trading rules for specific timeframes, returning structured setup models (`DailySetup`).
+4. **Storage & Orchestration (`storage.py`, `daily_scanner.py`):** Persistence of qualified candidates to `h1_watchlist.json` and end-to-end workflow handling ticker ingestion, API fetching, and terminal reporting.
 
 ## Technologies
 
@@ -32,15 +32,17 @@ The application follows a **4-tier layered architecture** ensuring separation of
 ```text
 trade-companion/
 ├── data/
+│   ├── h1_watchlist.json         # Qualified setups for H1 execution
 │   └── tickers.json              # Watchlist configuration
 ├── src/
 │   └── trade_companion/
 │       ├── __init__.py
 │       ├── daily_scanner.py      # Entry point / Orchestration
-│       ├── daily_trend.py        # Strategy definition (SMA + HH/HL)
+│       ├── daily_trend.py        # Strategy definition (SMA + HH/HL + Fib)
 │       ├── fetch_stock_data.py   # Market data fetching (yfinance adapter)
-│       ├── indicators.py         # Pure math indicators & swing point detection
+│       ├── indicators.py         # Pure indicators, swing points & Fibonacci
 │       ├── signals.py            # Boolean market signals
+│       ├── storage.py            # H1 watchlist persistence & JSON serialization
 │       └── tickers.py            # Watchlist loader, parser & deduplicator
 ├── tests/
 │   ├── integration/
@@ -51,6 +53,7 @@ trade-companion/
 │       ├── test_fetch_stock_data.py
 │       ├── test_indicators.py
 │       ├── test_signals.py
+│       ├── test_storage.py
 │       └── test_tickers.py
 ├── .gitignore
 ├── pyproject.toml
@@ -134,10 +137,9 @@ To format and lint automatically on save, add the following to .vscode/settings.
 ```
 ## Features
 ### Completed
-Completed
 - [x] 4-layer modular architecture (Indicators -> Signals -> Strategy -> Scanner).
 
-- [x] Ticker loader with deduplication and order preservation (tickers.py).
+- [x] Ticker loader with deduplication, string cleaning, and order preservation (tickers.py).
 
 - [x] Batch data downloading with MultiIndex mapping to individual stock DataFrames (fetch_stock_data.py).
 
@@ -147,18 +149,22 @@ Completed
 
 - [x] Market structure trend evaluation (is_hh_hl_trend).
 
-- [x] Trend signals evaluation with NaN and data insufficiency protection (signals.py).
+- [x] Active trading range detection and Fibonacci 0.50 – 0.618 retracement zones (calculate_fib_zone, is_price_in_fib_zone).
+
+- [x] Candidate persistence and deserialization for H1 timeframe (storage.py -> h1_watchlist.json).
 
 - [x] Comprehensive unit and integration test suite with high coverage using pytest.
 
 ### In Progress / Planned
+- [ ] Hourly timeframe trigger scanner (hourly_scanner.py using h1_watchlist.json).
+
 - [ ] Volume confirmation filters (e.g., volume spike, volume > SMA 20).
 
 - [ ] Support and resistance zone detection.
 
-- [ ] Risk/Reward ratio calculation and stop-loss placement.
+- [ ] Risk/Reward ratio calculation and dynamic stop-loss placement.
 
-- [ ] Exporting scan results to CSV or JSON / Telegram alerts.
+- [ ] Telegram / Discord trade notifications.
 
 ## Status
 🚧 Work in progress.
